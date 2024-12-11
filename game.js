@@ -27,7 +27,12 @@ let game = {
 
     init() {
         this.ctx = document.getElementById("mycanvas").getContext("2d");
+        this.setTextFont();
         this.setEvents();
+    },
+    setTextFont() {
+        this.ctx.font = "20px Arial";
+        this.ctx.fillStyle = "#FFFFFF";
     },
 
     setEvents() {
@@ -46,10 +51,8 @@ let game = {
     preload(callback) {
         let loaded = 0;
         let required = Object.keys(this.sprites).length;
-        let onImageLoad = () => {
-            required += Object.keys(this.sounds).length;
-        };
         required += Object.keys(this.sounds).length;
+
         let onResourceLoad = () => {
             ++loaded;
             if (loaded >= required) {
@@ -64,7 +67,6 @@ let game = {
         for (let key in this.sprites) {
             this.sprites[key] = new Image();
             this.sprites[key].src = "img/" + key + ".png";
-            this.sprites[key].addEventListener("load", onImageLoad);
             this.sprites[key].addEventListener("load", onResourceLoad);
         }
     },
@@ -140,6 +142,7 @@ let game = {
             this.ball.x, this.ball.y, this.ball.width, this.ball.height);
         this.ctx.drawImage(this.sprites.platform, this.platform.x, this.platform.y);
         this.renderBlocks();
+        this.ctx.fillText("Score: " + this.score, 15, 20);
     },
 
     renderBlocks() {
@@ -220,7 +223,6 @@ game.ball = {
         let worldBottom = game.height;
 
         if (ballLeft < worldLeft) {
-            this.x = 0;
             this.x = 0; 
             this.dx = this.velocity;
             game.sounds.bump.play();
