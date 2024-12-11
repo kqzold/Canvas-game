@@ -21,8 +21,11 @@ let game = {
         platform: null,
         block: null
     },
+    sounds: {
+        bump: null,
+    },
 
-    init: function() {
+    init() {
         this.ctx = document.getElementById("mycanvas").getContext("2d");
         this.setEvents();
     },
@@ -44,16 +47,31 @@ let game = {
         let loaded = 0;
         let required = Object.keys(this.sprites).length;
         let onImageLoad = () => {
+            required += Object.keys(this.sounds).length;
+        };
+        required += Object.keys(this.sounds).length;
+        let onResourceLoad = () => {
             ++loaded;
             if (loaded >= required) {
                 callback();
             }
         };
 
+        this.preloadSprites(onResourceLoad);
+        this.preloadAudio(onResourceLoad);
+    },
+    preloadSprites(onResourceLoad) {
         for (let key in this.sprites) {
             this.sprites[key] = new Image();
             this.sprites[key].src = "img/" + key + ".png";
             this.sprites[key].addEventListener("load", onImageLoad);
+            this.sprites[key].addEventListener("load", onResourceLoad);
+        }
+    },
+    preloadAudio(onResourceLoad) {
+        for (let key in this.sounds) {
+            this.sounds[key] = new Audio("sounds/" + key + ".mp3");
+            this.sounds[key].addEventListener("canplaythrough", onResourceLoad, {once: true});
         }
     },
 
@@ -82,15 +100,18 @@ let game = {
 
     addScore() {
         ++this.score;
+
         if (this.score >= this.blocks.length) {
             this.end("вы победили");
         }
     },
+
     collideBlocks() {
         for (let block of this.blocks) {
             if (block.active && this.ball.collide(block)) {
                 this.ball.bumpBlock(block);
                 this.addScore();
+                this.sounds.bump.play();
             }
         }
     },
@@ -98,6 +119,7 @@ let game = {
     collidePlatform() {
         if (this.ball.collide(this.platform)) {
             this.ball.bumpPlatform(this.platform);
+            this.sounds.bump.play();
         }
     },
 
@@ -135,11 +157,13 @@ let game = {
             this.run();
         });
     },
+
     end(message) {
         this.running = false;
         alert(message);
         window.location.reload();
     },
+
     random(min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
@@ -197,13 +221,17 @@ game.ball = {
 
         if (ballLeft < worldLeft) {
             this.x = 0;
+            this.x = 0; 
             this.dx = this.velocity;
+            game.sounds.bump.play();
         } else if (ballRight > worldRight) {
             this.x = worldRight - this.width;
             this.dx = -this.velocity;
+            game.sounds.bump.play();
         } else if (ballTop < worldTop) {
             this.y = 0;
             this.dy = this.velocity;
+            game.sounds.bump.play();
         } else if (ballBottom > worldBottom) {
             game.running = false;
             alert("вы проиграли");
@@ -219,6 +247,7 @@ game.ball = {
         if (platform.dx) {
             this.x += platform.dx;
         }
+
         if (this.dy > 0) {
             this.dy = -this.velocity;
             let touchX = this.x + this.width / 2;
