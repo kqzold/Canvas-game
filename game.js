@@ -11,8 +11,8 @@ let game = {
     ball: null,
     blocks: [],
     score: 0,
-    rows: 4,
-    cols: 8,
+    rows: 6,
+    cols: 10,
     width: 640,
     height: 360,
     sprites: {
@@ -175,7 +175,7 @@ let game = {
 game.ball = {
     dx: 0,
     dy: 0,
-    velocity: 3,
+    velocity: 5,
     x: 320,
     y: 280,
     width: 20,
